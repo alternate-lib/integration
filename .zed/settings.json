@@ -1,0 +1,29 @@
+{
+  "lsp": {
+    "rust-analyzer": {
+      "initialization_options": {
+        "cargo": {
+          "features": "all"
+        }
+      }
+    }
+  },
+  "languages": {
+    "JSON": {
+      "tab_size": 2
+    },
+    "JSONC": {
+      "tab_size": 2
+    },
+    "TOML": {
+      "formatter": [
+        {
+          "language_server": {
+            "name": "tombi"
+          }
+        }
+      ],
+      "language_servers": ["tombi"]
+    }
+  }
+}

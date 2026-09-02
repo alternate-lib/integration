@@ -1,0 +1,2 @@
+[registries.self-hosted]
+index = "sparse+https://git.thealternate.dev/api/packages/alternate/cargo/"
