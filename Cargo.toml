@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["crates/platform", "crates/worker"]
+members = ["crates/middleware", "crates/platform", "crates/worker"]
 
 [workspace.dependencies]
 alternate-codec = { version = "0.1.0", registry = "self-hosted", git = "https://git.thealternate.dev/alternate/foundation", rev = "d68ecfdc1ec597dbf3e499d5912a04ec0a943c83" }
