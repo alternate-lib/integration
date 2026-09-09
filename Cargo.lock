@@ -66,7 +66,10 @@ dependencies = [
 name = "alternate-middleware"
 version = "0.1.0"
 dependencies = [
+ "alternate-codec",
  "alternate-http",
+ "alternate-http-cache",
+ "alternate-platform",
  "bytes",
  "http",
  "thiserror",

@@ -4,11 +4,14 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+alternate-codec.workspace = true
 alternate-http.workspace = true
+alternate-http-cache.workspace = true
+alternate-platform.workspace = true
 
 bytes = "1.12.1"
 http = "1.5.0"
-tower = { version = "0.5.3", features = ["buffer"] }
+tower = { version = "0.5.3", features = ["buffer", "util"] }
 thiserror.workspace = true
 
 [lints]
