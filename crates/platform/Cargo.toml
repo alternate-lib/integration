@@ -1,0 +1,18 @@
+[package]
+name = "alternate-platform"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+alternate-codec.workspace = true
+alternate-http.workspace = true
+alternate-kv.workspace = true
+alternate-queue.workspace = true
+
+bytes = "1.12.1"
+http = "1.5.0"
+serde.workspace = true
+thiserror.workspace = true
+
+[lints]
+workspace = true
