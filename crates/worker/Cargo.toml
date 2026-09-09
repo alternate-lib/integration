@@ -1,0 +1,20 @@
+[package]
+name = "alternate-worker"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+alternate-codec.workspace = true
+alternate-queue.workspace = true
+
+anyhow.workspace = true
+chrono = { version = "0.4.45", default-features = false }
+cron = "0.17.0"
+serde.workspace = true
+thiserror.workspace = true
+tokio = { version = "1.53.1", features = ["macros"] }
+tower = { version = "0.5.3", features = ["limit", "util"] }
+tracing.workspace = true
+
+[lints]
+workspace = true

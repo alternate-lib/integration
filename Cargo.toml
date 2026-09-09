@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["crates/platform"]
+members = ["crates/platform", "crates/worker"]
 
 [workspace.dependencies]
 alternate-codec = { version = "0.1.0", registry = "self-hosted", git = "https://git.thealternate.dev/alternate/foundation", rev = "d68ecfdc1ec597dbf3e499d5912a04ec0a943c83" }
@@ -8,8 +8,11 @@ alternate-http = { version = "0.1.0", registry = "self-hosted", git = "https://g
 alternate-kv = { version = "0.1.0", registry = "self-hosted", git = "https://git.thealternate.dev/alternate/platform", rev = "22995e6080f5e51961bb0bfc313f84a237b808a9" }
 alternate-queue = { version = "0.1.0", registry = "self-hosted", git = "https://git.thealternate.dev/alternate/platform", rev = "22995e6080f5e51961bb0bfc313f84a237b808a9" }
 
+anyhow = "1.0.104"
 serde.version = "1.0.229"
 thiserror = "2.0.20"
+tracing = "0.1.44"
 
 [workspace.lints.clippy]
 pedantic = { level = "warn", priority = -1 }
+must_use_candidate = "allow"
