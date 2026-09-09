@@ -5,13 +5,13 @@ use http::{Method, Request, Response};
 use serde::{Serialize, de::DeserializeOwned};
 
 pub trait HttpClientTyped<C: Codec>: HttpClient {
-    fn send_typed<U: Serialize, V: DeserializeOwned>(
+    fn send_typed<U: Serialize + Send, V: DeserializeOwned>(
         &self,
         request: Request<U>,
-    ) -> impl Future<Output = Result<Response<V>, HttpTypedError<C::Error, Self::Error>>>;
+    ) -> impl Future<Output = Result<Response<V>, HttpTypedError<C::Error, Self::Error>>> + Send;
 }
 
-impl<HC: HttpClient, C: Codec> HttpClientTyped<C> for HC {
+impl<HC: HttpClient + Sync, C: Codec> HttpClientTyped<C> for HC {
     async fn send_typed<U: Serialize, V: DeserializeOwned>(
         &self,
         request: Request<U>,
@@ -31,10 +31,13 @@ impl<HC: HttpClient, C: Codec> HttpClientTyped<C> for HC {
 }
 
 pub trait HttpExt: HttpClient {
-    fn get(&self, url: &str) -> impl Future<Output = Result<Bytes, HttpExtError<Self::Error>>>;
+    fn get(
+        &self,
+        url: &str,
+    ) -> impl Future<Output = Result<Bytes, HttpExtError<Self::Error>>> + Send;
 }
 
-impl<HC: HttpClient> HttpExt for HC {
+impl<HC: HttpClient + Sync> HttpExt for HC {
     async fn get(&self, url: &str) -> Result<Bytes, HttpExtError<Self::Error>> {
         let request = Request::builder()
             .method(Method::GET)
@@ -52,10 +55,10 @@ pub trait HttpExtTyped<C: Codec>: HttpExt {
     fn get_typed<V: DeserializeOwned>(
         &self,
         url: &str,
-    ) -> impl Future<Output = Result<V, HttpTypedError<C::Error, HttpExtError<Self::Error>>>>;
+    ) -> impl Future<Output = Result<V, HttpTypedError<C::Error, HttpExtError<Self::Error>>>> + Send;
 }
 
-impl<HE: HttpExt, C: Codec> HttpExtTyped<C> for HE {
+impl<HE: HttpExt + Sync, C: Codec> HttpExtTyped<C> for HE {
     async fn get_typed<V: DeserializeOwned>(
         &self,
         url: &str,

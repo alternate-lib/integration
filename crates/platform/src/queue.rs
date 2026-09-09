@@ -8,13 +8,13 @@ pub trait QueueProducerTyped<C: Codec> {
     type MessageId;
     type Error: std::error::Error;
 
-    fn send_typed<P: Serialize>(
+    fn send_typed<P: Serialize + Send>(
         &self,
         message: QueueMessageTyped<P>,
-    ) -> impl Future<Output = Result<Self::MessageId, Self::Error>>;
+    ) -> impl Future<Output = Result<Self::MessageId, Self::Error>> + Send;
 }
 
-impl<QP: QueueProducer, C: Codec> QueueProducerTyped<C> for QP {
+impl<QP: QueueProducer + Sync, C: Codec> QueueProducerTyped<C> for QP {
     type MessageId = QP::MessageId;
     type Error = QueueTypedError<C::Error, QP::Error>;
 
@@ -42,10 +42,10 @@ pub trait QueueConsumerTyped<C: Codec> {
 
     fn receive_typed<P: DeserializeOwned>(
         &self,
-    ) -> impl Future<Output = Result<Option<QueueDeliveryTyped<P, Self::Receipt>>, Self::Error>>;
+    ) -> impl Future<Output = Result<Option<QueueDeliveryTyped<P, Self::Receipt>>, Self::Error>> + Send;
 }
 
-impl<QC: QueueConsumer, C: Codec> QueueConsumerTyped<C> for QC {
+impl<QC: QueueConsumer + Sync, C: Codec> QueueConsumerTyped<C> for QC {
     type Receipt = QC::Receipt;
     type Error = QueueTypedError<C::Error, QC::Error>;
 
