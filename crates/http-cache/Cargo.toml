@@ -1,0 +1,27 @@
+[package]
+name = "alternate-http-cache"
+version = "0.1.0"
+edition = "2024"
+
+[features]
+default = []
+tracing = ["dep:tracing"]
+
+[dependencies]
+alternate-codec.workspace = true
+alternate-crypto = { workspace = true, features = ["blake3", "hex"] }
+alternate-kv.workspace = true
+alternate-platform.workspace = true
+
+bytes = "1.12.1"
+headers = "0.4.1"
+http = "1.5.0"
+http-cache-semantics = { version = "3.0.0", features = ["serde"] }
+http-serde = "2.1.1"
+jiff = { workspace = true, features = ["serde"] }
+serde.workspace = true
+thiserror.workspace = true
+tracing = { workspace = true, optional = true }
+
+[lints]
+workspace = true
