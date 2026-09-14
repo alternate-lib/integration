@@ -52,6 +52,8 @@ impl<C: Codec, KET: KvExpiryTyped<C> + Sync> HttpCache<C, KET> {
             Err(KvTypedError::Codec(error)) => {
                 #[cfg(feature = "tracing")]
                 tracing::warn!(?error, "HTTP cache entry could not be decoded");
+                #[cfg(not(feature = "tracing"))]
+                let _ = error;
 
                 self.invalidate(req).await;
 
@@ -60,6 +62,8 @@ impl<C: Codec, KET: KvExpiryTyped<C> + Sync> HttpCache<C, KET> {
             Err(KvTypedError::Client(error)) => {
                 #[cfg(feature = "tracing")]
                 tracing::warn!(?error, "HTTP cache read failed");
+                #[cfg(not(feature = "tracing"))]
+                let _ = error;
 
                 return Ok(CacheDecision::Miss);
             }
@@ -76,6 +80,8 @@ impl<C: Codec, KET: KvExpiryTyped<C> + Sync> HttpCache<C, KET> {
             Err(error) => {
                 #[cfg(feature = "tracing")]
                 tracing::warn!(?error, "HTTP cache entry was malformed");
+                #[cfg(not(feature = "tracing"))]
+                let _ = error;
 
                 self.invalidate(req).await;
 
