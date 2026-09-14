@@ -55,13 +55,17 @@ pub struct HttpCacheService<C: Codec, KET: KvExpiryTyped<C>, S> {
 
 impl<C, KET, S> Service<Request<Bytes>> for HttpCacheService<C, KET, S>
 where
-    C: Codec + 'static,
-    KET: KvExpiryTyped<C> + Sync + 'static,
-    S: Service<Request<Bytes>, Response = Response<Bytes>> + Clone + 'static,
+    C: Codec + Send + Sync + 'static,
+    C::Error: Send,
+    KET: KvExpiryTyped<C> + Send + Sync + 'static,
+    KET::Error: Send,
+    S: Service<Request<Bytes>, Response = Response<Bytes>> + Clone + Send + 'static,
+    S::Future: Send,
+    S::Error: Send,
 {
     type Response = Response<Bytes>;
     type Error = S::Error;
-    type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>>>>;
+    type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>> + Send>>;
 
     fn poll_ready(&mut self, _cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
         Poll::Ready(Ok(()))
