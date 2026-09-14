@@ -77,10 +77,10 @@ pub struct QueueMessageTyped<P: Serialize> {
 }
 
 impl<P: Serialize> QueueMessageTyped<P> {
-    pub fn new(payload: impl Into<P>) -> Self {
+    pub fn new(payload: P) -> Self {
         Self {
             id: None,
-            payload: payload.into(),
+            payload,
             attributes: BTreeMap::new(),
         }
     }
