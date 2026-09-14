@@ -1,0 +1,23 @@
+[package]
+name = "alternate-postgres"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+alternate-domain.workspace = true
+alternate-migration = { workspace = true, features = ["postgres"], optional = true }
+
+deadpool-postgres = "0.14.2"
+rust-embed = { version = "8.12.0", optional = true }
+testcontainers = { version = "0.28.0", optional = true }
+thiserror.workspace = true
+tokio = "1.53.1"
+tokio-postgres = "0.7.18"
+
+[features]
+default = []
+migration = ["dep:alternate-migration", "dep:rust-embed"]
+test = ["migration", "dep:testcontainers"]
+
+[lints]
+workspace = true
