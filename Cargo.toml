@@ -1,6 +1,7 @@
 [workspace]
 resolver = "3"
 members = [
+  "crates/api",
   "crates/http-cache",
   "crates/middleware",
   "crates/platform",
@@ -9,14 +10,16 @@ members = [
 ]
 
 [workspace.dependencies]
-alternate-codec = { version = "0.1.0", registry = "self-hosted", git = "https://git.thealternate.dev/alternate/foundation", rev = "31f4e3fa3360b42c2ba0c77dc848d13989722a13" }
-alternate-crypto = { version = "0.1.0", registry = "self-hosted", git = "https://git.thealternate.dev/alternate/foundation", rev = "31f4e3fa3360b42c2ba0c77dc848d13989722a13" }
-alternate-domain = { version = "0.1.0", registry = "self-hosted", git = "https://git.thealternate.dev/alternate/foundation", rev = "31f4e3fa3360b42c2ba0c77dc848d13989722a13" }
+alternate-http-cache.path = "crates/http-cache"
+alternate-platform.path = "crates/platform"
+
+alternate-codec = { version = "0.1.0", registry = "self-hosted", git = "https://git.thealternate.dev/alternate/foundation", rev = "23b220c63c7695dd5486c8b0a69e287b62ed6e2c" }
+alternate-crypto = { version = "0.1.0", registry = "self-hosted", git = "https://git.thealternate.dev/alternate/foundation", rev = "23b220c63c7695dd5486c8b0a69e287b62ed6e2c" }
+alternate-domain = { version = "0.1.0", registry = "self-hosted", git = "https://git.thealternate.dev/alternate/foundation", rev = "23b220c63c7695dd5486c8b0a69e287b62ed6e2c" }
+
 alternate-http = { version = "0.1.0", registry = "self-hosted", git = "https://git.thealternate.dev/alternate/platform", rev = "c836583dc25320e43ec9bd2895edb358655825be" }
 alternate-kv = { version = "0.1.0", registry = "self-hosted", git = "https://git.thealternate.dev/alternate/platform", rev = "c836583dc25320e43ec9bd2895edb358655825be" }
-alternate-http-cache.path = "crates/http-cache"
 alternate-migration = { version = "0.1.0", registry = "self-hosted", git = "https://git.thealternate.dev/alternate/platform", rev = "c836583dc25320e43ec9bd2895edb358655825be" }
-alternate-platform.path = "crates/platform"
 alternate-queue = { version = "0.1.0", registry = "self-hosted", git = "https://git.thealternate.dev/alternate/platform", rev = "c836583dc25320e43ec9bd2895edb358655825be" }
 
 anyhow = "1.0.104"
@@ -24,6 +27,7 @@ jiff = "0.2.35"
 serde.version = "1.0.229"
 thiserror = "2.0.20"
 tracing = "0.1.44"
+uuid = "1.26.1"
 
 [workspace.lints.clippy]
 pedantic = { level = "warn", priority = -1 }
