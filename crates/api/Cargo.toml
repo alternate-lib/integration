@@ -4,8 +4,10 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+alternate-authentication.workspace = true
 alternate-crypto = { workspace = true, features = ["base64"] }
 alternate-domain.workspace = true
+alternate-middleware.workspace = true
 
 anyhow.workspace = true
 axum = { version = "0.8.9", features = ["macros"] }

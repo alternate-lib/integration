@@ -15,8 +15,10 @@ dependencies = [
 name = "alternate-api"
 version = "0.1.0"
 dependencies = [
+ "alternate-authentication",
  "alternate-crypto",
  "alternate-domain",
+ "alternate-middleware",
  "anyhow",
  "axum",
  "axum-extra",
@@ -25,6 +27,15 @@ dependencies = [
  "time",
  "utoipa",
  "uuid",
+]
+
+[[package]]
+name = "alternate-authentication"
+version = "0.1.0"
+source = "git+https://git.thealternate.dev/alternate/foundation?rev=aa64b170f4ae09b5b8721aa669e1fdadd9293924#aa64b170f4ae09b5b8721aa669e1fdadd9293924"
+dependencies = [
+ "nutype",
+ "thiserror",
 ]
 
 [[package]]
@@ -101,13 +112,17 @@ dependencies = [
 name = "alternate-middleware"
 version = "0.1.0"
 dependencies = [
+ "alternate-authentication",
  "alternate-codec",
  "alternate-http",
  "alternate-http-cache",
  "alternate-platform",
+ "anyhow",
  "bytes",
+ "headers",
  "http",
  "thiserror",
+ "tokio",
  "tower",
 ]
 
