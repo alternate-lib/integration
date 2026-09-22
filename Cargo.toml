@@ -14,7 +14,7 @@ alternate-http-cache.path = "crates/http-cache"
 alternate-middleware.path = "crates/middleware"
 alternate-platform.path = "crates/platform"
 
-alternate-authentication = { version = "0.1.0", registry = "self-hosted", git = "https://git.thealternate.dev/alternate/foundation", rev = "aa64b170f4ae09b5b8721aa669e1fdadd9293924" }
+alternate-authentication = { version = "0.1.0", registry = "self-hosted", git = "https://git.thealternate.dev/alternate/foundation", rev = "b91ae79664147c4b605fdba83aefbdfde9f1d0f4" }
 alternate-codec = { version = "0.1.0", registry = "self-hosted", git = "https://git.thealternate.dev/alternate/foundation", rev = "23b220c63c7695dd5486c8b0a69e287b62ed6e2c" }
 alternate-crypto = { version = "0.1.0", registry = "self-hosted", git = "https://git.thealternate.dev/alternate/foundation", rev = "23b220c63c7695dd5486c8b0a69e287b62ed6e2c" }
 alternate-domain = { version = "0.1.0", registry = "self-hosted", git = "https://git.thealternate.dev/alternate/foundation", rev = "23b220c63c7695dd5486c8b0a69e287b62ed6e2c" }

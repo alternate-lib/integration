@@ -25,6 +25,7 @@ dependencies = [
  "serde",
  "serde_json",
  "time",
+ "tokio",
  "utoipa",
  "uuid",
 ]
@@ -32,7 +33,7 @@ dependencies = [
 [[package]]
 name = "alternate-authentication"
 version = "0.1.0"
-source = "git+https://git.thealternate.dev/alternate/foundation?rev=aa64b170f4ae09b5b8721aa669e1fdadd9293924#aa64b170f4ae09b5b8721aa669e1fdadd9293924"
+source = "git+https://git.thealternate.dev/alternate/foundation?rev=b91ae79664147c4b605fdba83aefbdfde9f1d0f4#b91ae79664147c4b605fdba83aefbdfde9f1d0f4"
 dependencies = [
  "nutype",
  "thiserror",

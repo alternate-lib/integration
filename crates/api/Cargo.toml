@@ -18,5 +18,8 @@ time.version = "0.3.55"
 utoipa = { version = "5.5.0", features = ["uuid"] }
 uuid = { workspace = true, features = ["serde"] }
 
+[dev-dependencies]
+tokio = { version = "1.53.1", features = ["macros", "rt"] }
+
 [lints]
 workspace = true

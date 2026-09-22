@@ -85,3 +85,57 @@ fn unauthenticated_response() -> Response {
 
     response
 }
+
+#[cfg(test)]
+mod tests {
+    use alternate_middleware::authentication::AuthenticationBackendError;
+    use axum::http::StatusCode;
+
+    use super::*;
+
+    #[tokio::test]
+    async fn maps_missing_and_invalid_credentials_to_unauthenticated() {
+        let errors = [
+            AuthenticationError::Unauthenticated,
+            AuthenticationError::CredentialVerifier(CredentialVerifierError::MissingCredential),
+            AuthenticationError::CredentialVerifier(CredentialVerifierError::InvalidCredential),
+        ];
+
+        for error in errors {
+            let response = handle_authentication_error(error).await;
+
+            assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
+            assert_eq!(
+                response.headers().get(header::WWW_AUTHENTICATE),
+                Some(&HeaderValue::from_static("Bearer"))
+            );
+        }
+    }
+
+    #[tokio::test]
+    async fn maps_resolver_denial_to_forbidden() {
+        let error = AuthenticationError::ContextResolver(ContextResolverError::AccessDenied);
+
+        let response = handle_authentication_error(error).await;
+
+        assert_eq!(response.status(), StatusCode::FORBIDDEN);
+    }
+
+    #[tokio::test]
+    async fn maps_backend_failures_to_server_errors() {
+        let errors = [
+            AuthenticationError::CredentialVerifier(CredentialVerifierError::Backend(
+                AuthenticationBackendError::from(anyhow::anyhow!("verifier unavailable")),
+            )),
+            AuthenticationError::ContextResolver(ContextResolverError::Backend(
+                AuthenticationBackendError::from(anyhow::anyhow!("resolver unavailable")),
+            )),
+        ];
+
+        for error in errors {
+            let response = handle_authentication_error(error).await;
+
+            assert_eq!(response.status(), StatusCode::INTERNAL_SERVER_ERROR);
+        }
+    }
+}

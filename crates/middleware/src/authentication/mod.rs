@@ -81,7 +81,7 @@ where
     SS: ScopeSelector + Send + Sync + 'static,
     CV: CredentialVerifier + Send + Sync + 'static,
     CV::BackendError: Send + Sync,
-    CR: ContextResolver<Scope = SS::Scope> + Send + Sync + 'static,
+    CR: ContextResolver<Evidence = CV::Evidence, Scope = SS::Scope> + Send + Sync + 'static,
     CR::Context: Clone + Send + Sync + 'static,
     CR::BackendError: Send + Sync,
 {
@@ -116,13 +116,13 @@ where
                 };
             };
 
-            let identity = credential_verifier
+            let verified_credential = credential_verifier
                 .verify(credential)
                 .await
                 .map_err(|e| e.map_backend(|e| AuthenticationBackendError(e.into())))?;
             let scope = scope_selector.select(&request)?;
             let context = context_resolver
-                .resolve(identity, scope)
+                .resolve(verified_credential, scope)
                 .await
                 .map_err(|e| e.map_backend(|e| AuthenticationBackendError(e.into())))?;
 
@@ -207,7 +207,7 @@ mod tests {
 
     use alternate_authentication::{
         AuthenticatedIdentity, Credential, CredentialContext, CredentialRestrictions, Issuer,
-        Subject, SubjectId,
+        Subject, SubjectId, VerifiedCredential,
     };
     use http::header;
     use tower::{ServiceExt as _, service_fn};
@@ -218,40 +218,159 @@ mod tests {
     struct AcceptVerifier;
 
     impl CredentialVerifier for AcceptVerifier {
+        type Evidence = ();
         type BackendError = AuthenticationBackendError;
 
         async fn verify(
             &self,
             credential: Credential,
-        ) -> Result<AuthenticatedIdentity, CredentialVerifierError<Self::BackendError>> {
-            Ok(AuthenticatedIdentity::new(
-                Subject::new(
-                    Issuer::try_new("identity").unwrap(),
-                    SubjectId::try_new(credential.expose_secret()).unwrap(),
-                ),
-                CredentialContext::new(
-                    credential.kind(),
-                    None,
-                    CredentialRestrictions::unrestricted(),
-                ),
-            ))
+        ) -> Result<VerifiedCredential<Self::Evidence>, CredentialVerifierError<Self::BackendError>>
+        {
+            Ok(VerifiedCredential::new(identity_for(&credential), ()))
         }
+    }
+
+    fn identity_for(credential: &Credential) -> AuthenticatedIdentity {
+        AuthenticatedIdentity::new(
+            Subject::new(
+                Issuer::try_new("identity").unwrap(),
+                SubjectId::try_new(credential.expose_secret()).unwrap(),
+            ),
+            CredentialContext::new(
+                credential.kind(),
+                None,
+                CredentialRestrictions::unrestricted(),
+            ),
+        )
     }
 
     #[derive(Clone, Copy)]
     struct SubjectResolver;
 
     impl ContextResolver for SubjectResolver {
+        type Evidence = ();
         type Scope = ();
         type Context = String;
         type BackendError = AuthenticationBackendError;
 
         async fn resolve(
             &self,
-            identity: AuthenticatedIdentity,
+            credential: VerifiedCredential<Self::Evidence>,
             (): Self::Scope,
         ) -> Result<Self::Context, ContextResolverError<Self::BackendError>> {
-            Ok(identity.subject().id().to_string())
+            Ok(credential.identity().subject().id().to_string())
+        }
+    }
+
+    #[derive(Clone, Copy)]
+    struct InvalidVerifier;
+
+    impl CredentialVerifier for InvalidVerifier {
+        type Evidence = ();
+        type BackendError = AuthenticationBackendError;
+
+        async fn verify(
+            &self,
+            _credential: Credential,
+        ) -> Result<VerifiedCredential<Self::Evidence>, CredentialVerifierError<Self::BackendError>>
+        {
+            Err(CredentialVerifierError::InvalidCredential)
+        }
+    }
+
+    #[derive(Clone, Copy)]
+    struct BackendFailingVerifier;
+
+    impl CredentialVerifier for BackendFailingVerifier {
+        type Evidence = ();
+        type BackendError = AuthenticationBackendError;
+
+        async fn verify(
+            &self,
+            _credential: Credential,
+        ) -> Result<VerifiedCredential<Self::Evidence>, CredentialVerifierError<Self::BackendError>>
+        {
+            Err(CredentialVerifierError::Backend(
+                anyhow::anyhow!("verifier unavailable").into(),
+            ))
+        }
+    }
+
+    #[derive(Clone, Copy)]
+    struct DenyingResolver;
+
+    impl ContextResolver for DenyingResolver {
+        type Evidence = ();
+        type Scope = ();
+        type Context = String;
+        type BackendError = AuthenticationBackendError;
+
+        async fn resolve(
+            &self,
+            _credential: VerifiedCredential<Self::Evidence>,
+            (): Self::Scope,
+        ) -> Result<Self::Context, ContextResolverError<Self::BackendError>> {
+            Err(ContextResolverError::AccessDenied)
+        }
+    }
+
+    #[derive(Clone, Copy)]
+    struct BackendFailingResolver;
+
+    impl ContextResolver for BackendFailingResolver {
+        type Evidence = ();
+        type Scope = ();
+        type Context = String;
+        type BackendError = AuthenticationBackendError;
+
+        async fn resolve(
+            &self,
+            _credential: VerifiedCredential<Self::Evidence>,
+            (): Self::Scope,
+        ) -> Result<Self::Context, ContextResolverError<Self::BackendError>> {
+            Err(ContextResolverError::Backend(
+                anyhow::anyhow!("resolver unavailable").into(),
+            ))
+        }
+    }
+
+    struct Sentinel(&'static str);
+
+    #[derive(Clone, Copy)]
+    struct EvidenceVerifier;
+
+    impl CredentialVerifier for EvidenceVerifier {
+        type Evidence = Sentinel;
+        type BackendError = AuthenticationBackendError;
+
+        async fn verify(
+            &self,
+            credential: Credential,
+        ) -> Result<VerifiedCredential<Self::Evidence>, CredentialVerifierError<Self::BackendError>>
+        {
+            Ok(VerifiedCredential::new(
+                identity_for(&credential),
+                Sentinel("verifier-produced"),
+            ))
+        }
+    }
+
+    #[derive(Clone, Copy)]
+    struct EvidenceResolver;
+
+    impl ContextResolver for EvidenceResolver {
+        type Evidence = Sentinel;
+        type Scope = ();
+        type Context = &'static str;
+        type BackendError = AuthenticationBackendError;
+
+        async fn resolve(
+            &self,
+            credential: VerifiedCredential<Self::Evidence>,
+            (): Self::Scope,
+        ) -> Result<Self::Context, ContextResolverError<Self::BackendError>> {
+            let (_, evidence) = credential.into_parts();
+            Ok(evidence.0)
         }
     }
 
@@ -340,5 +459,127 @@ mod tests {
                 CredentialSourceError::Malformed
             ))
         );
+    }
+
+    #[tokio::test]
+    async fn optional_auth_rejects_invalid_supplied_credentials() {
+        let service = AuthenticationLayer::new(
+            NoScope,
+            AuthenticationMode::Optional,
+            InvalidVerifier,
+            SubjectResolver,
+        )
+        .layer(service_fn(|_| async move { Ok::<_, Infallible>(()) }));
+        let request = Request::builder()
+            .header(header::AUTHORIZATION, "Bearer invalid")
+            .body(())
+            .unwrap();
+
+        let result = service.oneshot(request).await;
+
+        assert_matches!(
+            result,
+            Err(AuthenticationError::CredentialVerifier(
+                CredentialVerifierError::InvalidCredential
+            ))
+        );
+    }
+
+    #[tokio::test]
+    async fn propagates_verifier_backend_failures() {
+        let service = AuthenticationLayer::new(
+            NoScope,
+            AuthenticationMode::Required,
+            BackendFailingVerifier,
+            SubjectResolver,
+        )
+        .layer(service_fn(|_| async move { Ok::<_, Infallible>(()) }));
+        let request = Request::builder()
+            .header(header::AUTHORIZATION, "Bearer subject-1")
+            .body(())
+            .unwrap();
+
+        let result = service.oneshot(request).await;
+
+        assert_matches!(
+            result,
+            Err(AuthenticationError::CredentialVerifier(
+                CredentialVerifierError::Backend(_)
+            ))
+        );
+    }
+
+    #[tokio::test]
+    async fn propagates_resolver_access_denial() {
+        let service = AuthenticationLayer::new(
+            NoScope,
+            AuthenticationMode::Required,
+            AcceptVerifier,
+            DenyingResolver,
+        )
+        .layer(service_fn(|_| async move { Ok::<_, Infallible>(()) }));
+        let request = Request::builder()
+            .header(header::AUTHORIZATION, "Bearer subject-1")
+            .body(())
+            .unwrap();
+
+        let result = service.oneshot(request).await;
+
+        assert_matches!(
+            result,
+            Err(AuthenticationError::ContextResolver(
+                ContextResolverError::AccessDenied
+            ))
+        );
+    }
+
+    #[tokio::test]
+    async fn propagates_resolver_backend_failures() {
+        let service = AuthenticationLayer::new(
+            NoScope,
+            AuthenticationMode::Required,
+            AcceptVerifier,
+            BackendFailingResolver,
+        )
+        .layer(service_fn(|_| async move { Ok::<_, Infallible>(()) }));
+        let request = Request::builder()
+            .header(header::AUTHORIZATION, "Bearer subject-1")
+            .body(())
+            .unwrap();
+
+        let result = service.oneshot(request).await;
+
+        assert_matches!(
+            result,
+            Err(AuthenticationError::ContextResolver(
+                ContextResolverError::Backend(_)
+            ))
+        );
+    }
+
+    #[tokio::test]
+    async fn transports_non_unit_evidence_without_inspection() {
+        let inner = service_fn(|request: Request<()>| async move {
+            let context = request
+                .extensions()
+                .get::<Authenticated<&'static str>>()
+                .unwrap();
+            Ok::<_, Infallible>(context.0)
+        });
+        let service = AuthenticationLayer::new(
+            NoScope,
+            AuthenticationMode::Required,
+            EvidenceVerifier,
+            EvidenceResolver,
+        )
+        .layer(inner);
+        let request = Request::builder()
+            .header(header::AUTHORIZATION, "Bearer subject-1")
+            .body(())
+            .unwrap();
+
+        let response = service.oneshot(request).await.unwrap();
+
+        assert_eq!(response, "verifier-produced");
     }
 }
