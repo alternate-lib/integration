@@ -22,7 +22,7 @@ alternate-domain = { version = "0.1.0", registry = "self-hosted", git = "https:/
 alternate-http = { version = "0.1.0", registry = "self-hosted", git = "https://git.thealternate.dev/alternate/platform", rev = "c836583dc25320e43ec9bd2895edb358655825be" }
 alternate-kv = { version = "0.1.0", registry = "self-hosted", git = "https://git.thealternate.dev/alternate/platform", rev = "c836583dc25320e43ec9bd2895edb358655825be" }
 alternate-migration = { version = "0.1.0", registry = "self-hosted", git = "https://git.thealternate.dev/alternate/platform", rev = "c836583dc25320e43ec9bd2895edb358655825be" }
-alternate-queue = { version = "0.1.0", registry = "self-hosted", git = "https://git.thealternate.dev/alternate/platform", rev = "c836583dc25320e43ec9bd2895edb358655825be" }
+alternate-queue = { version = "0.1.0", registry = "self-hosted", git = "https://git.thealternate.dev/alternate/platform", rev = "65acc11e9647edbb09ddc56fd61e9ffda552033d" }
 
 anyhow = "1.0.104"
 jiff = "0.2.35"

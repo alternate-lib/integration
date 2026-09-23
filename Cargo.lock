@@ -170,7 +170,7 @@ dependencies = [
 [[package]]
 name = "alternate-queue"
 version = "0.1.0"
-source = "git+https://git.thealternate.dev/alternate/platform?rev=c836583dc25320e43ec9bd2895edb358655825be#c836583dc25320e43ec9bd2895edb358655825be"
+source = "git+https://git.thealternate.dev/alternate/platform?rev=65acc11e9647edbb09ddc56fd61e9ffda552033d#65acc11e9647edbb09ddc56fd61e9ffda552033d"
 dependencies = [
  "jiff",
  "thiserror",

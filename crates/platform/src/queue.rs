@@ -1,5 +1,3 @@
-use std::collections::BTreeMap;
-
 use alternate_codec::Codec;
 use alternate_queue::{QueueConsumer, QueueMessage, QueueProducer};
 use serde::{Serialize, de::DeserializeOwned};
@@ -28,7 +26,6 @@ impl<QP: QueueProducer + Sync, C: Codec> QueueProducerTyped<C> for QP {
             .send(QueueMessage {
                 id: message.id,
                 payload: raw,
-                attributes: message.attributes,
             })
             .await?;
 
@@ -59,7 +56,6 @@ impl<QC: QueueConsumer + Sync, C: Codec> QueueConsumerTyped<C> for QC {
                         id: delivery.id,
                         payload: p,
                         attempts: delivery.attempts,
-                        attributes: delivery.attributes,
                         receipt: delivery.receipt,
                     })
                     .map_err(QueueTypedError::Codec)?,
@@ -73,16 +69,11 @@ impl<QC: QueueConsumer + Sync, C: Codec> QueueConsumerTyped<C> for QC {
 pub struct QueueMessageTyped<P: Serialize> {
     pub id: Option<String>,
     pub payload: P,
-    pub attributes: BTreeMap<String, String>,
 }
 
 impl<P: Serialize> QueueMessageTyped<P> {
     pub fn new(payload: P) -> Self {
-        Self {
-            id: None,
-            payload,
-            attributes: BTreeMap::new(),
-        }
+        Self { id: None, payload }
     }
 }
 
@@ -91,7 +82,6 @@ pub struct QueueDeliveryTyped<P: DeserializeOwned, R> {
     pub id: String,
     pub payload: P,
     pub attempts: usize,
-    pub attributes: BTreeMap<String, String>,
     pub receipt: R,
 }
 
